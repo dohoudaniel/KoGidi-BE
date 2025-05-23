@@ -1,0 +1,7 @@
+venv
+__pycache__
+students/__pycache__
+teachers/__pycache__
+parents/__pycache__
+.env
+db.sqlite3
