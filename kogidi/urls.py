@@ -41,10 +41,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # API endpoints
-    path('api/auth/', include('accounts.urls')),
-    path('api/students/', include('students.urls')),
-    path('api/teachers/', include('teachers.urls')),
-    path('api/parents/', include('parents.urls')),
+    path('api/', include('accounts.urls')),
+    path('api/v1/students/', include('students.urls')),
+    path('api/v1/teachers/', include('teachers.urls')),
+    path('api/v1/parents/', include('parents.urls')),
 
     # Swagger documentation
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',

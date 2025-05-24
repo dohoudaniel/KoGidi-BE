@@ -12,9 +12,31 @@ class Parent(models.Model):
         on_delete=models.CASCADE,
         related_name='parent_profile'
     )
-    phone_number = models.CharField(_('phone number'), max_length=20)
-    address = models.TextField(_('address'), blank=True)
-    occupation = models.CharField(_('occupation'), max_length=100, blank=True)
+    phone_number = models.CharField(
+        _('phone number'), max_length=20, blank=True, default='')
+    address = models.TextField(_('address'), blank=True, default='')
+    occupation = models.CharField(
+        _('occupation'), max_length=100, blank=True, default='')
+
+    # Additional parent fields
+    relationship_to_student = models.CharField(
+        _('relationship to student'), max_length=50, blank=True, default='')
+    secondary_phone = models.CharField(
+        _('secondary phone'), max_length=20, blank=True, default='')
+    email_secondary = models.EmailField(
+        _('secondary email'), blank=True, default='')
+    employer = models.CharField(
+        _('employer'), max_length=100, blank=True, default='')
+    work_phone = models.CharField(
+        _('work phone'), max_length=20, blank=True, default='')
+    preferred_contact_method = models.CharField(
+        _('preferred contact method'), max_length=20, blank=True, default='')
+    emergency_contact_name = models.CharField(
+        _('emergency contact name'), max_length=100, blank=True, default='')
+    emergency_contact_phone = models.CharField(
+        _('emergency contact phone'), max_length=20, blank=True, default='')
+
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
