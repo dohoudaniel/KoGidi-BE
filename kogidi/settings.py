@@ -32,9 +32,12 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(
-    ',') if os.getenv('ALLOWED_HOSTS') else []
-
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "kogidi.vercel.app",
+    "kogidi.netlify.app",
+    "kogidi-be.onrender.com"
+]
 
 # Application definition
 
