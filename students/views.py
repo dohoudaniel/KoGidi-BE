@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Student
 from .serializers import StudentSerializer, StudentProfileUpdateSerializer
 
@@ -31,6 +33,16 @@ class StudentProfileView(generics.RetrieveAPIView):
     """
     serializer_class = StudentSerializer
     permission_classes = [IsStudentUser]
+
+    @swagger_auto_schema(
+        responses={
+            200: StudentSerializer,
+            401: "User is not authenticated",
+            403: "User is not a student"
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_object(self):
         return self.request.user.student_profile
@@ -63,6 +75,15 @@ class StudentProfileUpdateView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user.student_profile
 
+    @swagger_auto_schema(
+        request_body=StudentProfileUpdateSerializer,
+        responses={
+            200: StudentSerializer,
+            400: "Invalid data provided",
+            401: "User is not authenticated",
+            403: "User is not a student"
+        }
+    )
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()

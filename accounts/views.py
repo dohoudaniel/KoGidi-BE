@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 
 User = get_user_model()
@@ -44,6 +46,25 @@ class RegisterView(generics.CreateAPIView):
         context.update({"user_type": user_type})
         return context
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'type',
+                openapi.IN_QUERY,
+                description="Type of user to register (student, teacher, parent)",
+                type=openapi.TYPE_STRING,
+                enum=['student', 'teacher', 'parent'],
+                required=True
+            )
+        ],
+        responses={
+            201: openapi.Response(
+                description="User registered successfully",
+                schema=UserSerializer
+            ),
+            400: "Bad Request"
+        }
+    )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -101,6 +122,27 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
+    @swagger_auto_schema(
+        request_body=LoginSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                'type',
+                openapi.IN_QUERY,
+                description="Type of user to login as (student, teacher, parent)",
+                type=openapi.TYPE_STRING,
+                enum=['student', 'teacher', 'parent'],
+                required=False
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Login successful",
+                schema=UserSerializer
+            ),
+            401: "Invalid credentials",
+            403: "User type mismatch"
+        }
+    )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -179,6 +221,11 @@ class LogoutView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        responses={
+            200: "Logout successful"
+        }
+    )
     def post(self, request):
         # Get refresh token from cookie
         refresh_token = request.COOKIES.get('refresh_token')
@@ -211,6 +258,12 @@ class TokenRefreshView(APIView):
     """
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(
+        responses={
+            200: "Token refreshed successfully",
+            401: "Invalid or missing refresh token"
+        }
+    )
     def post(self, request):
         # Get refresh token from cookie
         refresh_token = request.COOKIES.get('refresh_token')
@@ -258,6 +311,15 @@ class UserProfileView(generics.RetrieveAPIView):
     """
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        responses={
+            200: UserSerializer,
+            401: "User is not authenticated"
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_object(self):
         return self.request.user
