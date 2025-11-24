@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Parent, ParentStudentRelationship
 from .serializers import ParentSerializer, ParentProfileUpdateSerializer, ParentStudentRelationshipSerializer
 
@@ -32,6 +34,16 @@ class ParentProfileView(generics.RetrieveAPIView):
     serializer_class = ParentSerializer
     permission_classes = [IsParentUser]
 
+    @swagger_auto_schema(
+        responses={
+            200: ParentSerializer,
+            401: "User is not authenticated",
+            403: "User is not a parent"
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_object(self):
         return self.request.user.parent_profile
 
@@ -62,6 +74,15 @@ class ParentProfileUpdateView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user.parent_profile
 
+    @swagger_auto_schema(
+        request_body=ParentProfileUpdateSerializer,
+        responses={
+            200: ParentSerializer,
+            400: "Invalid data provided",
+            401: "User is not authenticated",
+            403: "User is not a parent"
+        }
+    )
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
