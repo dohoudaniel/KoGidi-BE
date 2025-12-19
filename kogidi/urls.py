@@ -47,6 +47,13 @@ urlpatterns = [
     path('api/v1/parents/', include('parents.urls')),
     path('api/v1/', include('courses.urls')),  # Courses, progress, assignments, achievements
 
+    # Health check endpoints
+    path('health/', include([
+        path('', lambda request: __import__('accounts.health', fromlist=['HealthCheckView']).HealthCheckView.as_view()(request), name='health-check'),
+        path('ready/', lambda request: __import__('accounts.health', fromlist=['ReadinessCheckView']).ReadinessCheckView.as_view()(request), name='readiness-check'),
+        path('live/', lambda request: __import__('accounts.health', fromlist=['LivenessCheckView']).LivenessCheckView.as_view()(request), name='liveness-check'),
+    ])),
+
     # Swagger documentation
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',
             schema_view.without_ui(cache_timeout=0), name='schema-json'),

@@ -1,380 +1,347 @@
-# KoGidi (Backend Functionality)
-🎓 KoGidi is an AI-powered offline learning platform designed for Nigerian students. It features a voice-activated homework assistant that understands English and native languages, recognizes Nigerian accents, and tracks student progress — making quality education accessible anywhere.
+# KoGidi Learning Platform - Backend
 
----
+Django REST API for the KoGidi learning management system.
 
-## Backend API Documentation
+## 🚀 Quick Start
 
-## Table of Contents
+### Prerequisites
+- Python 3.10+
+- MySQL 8.0+
+- pip & virtualenv
 
-1. [Authentication Endpoints](#authentication-endpoints)
-   1.1 [Login](#login)
-   1.2 [Refresh Token](#refresh-token)
-   1.3 [Logout](#logout)
-2. [Student Endpoints](#student-endpoints)
-   2.1 [List Students](#list-students)
-   2.2 [Retrieve Student](#retrieve-student)
-   2.3 [Create Student](#create-student)
-   2.4 [Update Student](#update-student)
-   2.5 [Delete Student](#delete-student)
-3. [Teacher Endpoints](#teacher-endpoints)
-4. [Parent Endpoints](#parent-endpoints)
-5. [Security & Middleware](#security--middleware)
-   5.1 [Cookie Settings](#cookie-settings)
-   5.2 [JWT Settings](#jwt-settings)
-   5.3 [Custom Middleware](#custom-middleware)
-6. [Error Handling](#error-handling)
-7. [Models & Data Schemas](#models--data-schemas)
-8. [Changelog & Notes](#changelog--notes)
+### Installation
 
----
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-## Authentication Endpoints
+# Install dependencies
+pip install -r requirements.txt
 
-All auth routes live under `/api/auth/`. Cookies are used to store tokens.
-Requests must include `credentials: 'include'` on the client.
+# Copy environment file
+cp .env.example .env
 
-### Login
+# Configure .env with your settings
 
-`POST /api/auth/login/`
+# Run migrations
+python manage.py migrate
 
-Authenticate user and issue tokens in cookies.
+# Create superuser
+python manage.py createsuperuser
 
-**Request Body** (JSON)
-
-```json
-{
-  "email": "user@example.com",
-  "password": "P@ssw0rd!"
-}
+# Run development server
+python manage.py runserver
 ```
 
-**Response** (200 OK)
+## 📁 Project Structure
 
-* Sets two cookies:
-
-  * `access_token` (HttpOnly, Secure, SameSite=Lax, max-age=900s)
-  * `refresh_token` (HttpOnly, Secure, SameSite=Lax, max-age=604800s)
-
-```json
-{ "msg": "Login successful" }
+```
+KoGidi-BE/
+├── kogidi/              # Main project settings
+│   ├── settings.py     # Django configuration
+│   ├── urls.py         # URL routing
+│   └── wsgi.py         # WSGI config
+├── accounts/           # User authentication
+├── students/           # Student profiles
+├── teachers/           # Teacher profiles
+├── parents/            # Parent profiles
+├── courses/            # Courses & content
+│   ├── models.py      # Database models
+│   ├── views.py       # API endpoints
+│   ├── serializers.py # Data serialization
+│   └── management/    # Management commands
+└── manage.py          # Django CLI
 ```
 
-**Errors**
+## 🎯 Key Features
 
-* `400 Bad Request` – missing fields
-* `401 Unauthorized` – invalid credentials
+- ✅ **JWT Authentication** - Secure token-based auth
+- ✅ **Role-Based Access** - Student, Teacher, Parent roles
+- ✅ **API Rate Limiting** - Prevents abuse
+- ✅ **Database Optimization** - 12 performance indexes
+- ✅ **CORS Configured** - Secure cross-origin requests
+- ✅ **API Documentation** - Swagger/OpenAPI
+- ✅ **Data Validation** - Strong validation rules
+
+## 🛠️ Tech Stack
+
+- **Framework:** Django 5.2 + Django REST Framework
+- **Database:** MySQL 8.0
+- **Authentication:** JWT (djangorestframework-simplejwt)
+- **API Docs:** drf-yasg (Swagger)
+- **CORS:** django-cors-headers
+- **Environment:** python-dotenv
+
+## 📦 Key Packages
+
+```
+Django==5.2.1
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.4.0
+mysqlclient==2.2.6
+django-cors-headers==4.6.0
+drf-yasg==1.21.8
+python-dotenv==1.0.1
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create `.env` file (see `.env.example`):
+
+```env
+# Django
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# Database
+DB_NAME=kogidi_db
+DB_USER=root
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=3306
+
+# JWT
+JWT_ACCESS_TOKEN_EXPIRES_MINUTES=15
+JWT_REFRESH_TOKEN_EXPIRES_DAYS=7
+```
+
+### Database Setup
+
+```bash
+# Create database
+mysql -u root -p
+CREATE DATABASE kogidi_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# Run migrations
+python manage.py migrate
+
+# Seed sample data
+python manage.py seed_all_data
+```
+
+## 🗄️ Database Models
+
+### Core Models
+- **User** - Custom user model (accounts)
+- **Student** - Student profiles
+- **Teacher** - Teacher profiles
+- **Parent** - Parent profiles
+- **Course** - Learning courses
+- **StudentProgress** - Course progress tracking
+- **Assignment** - Assignments & submissions
+- **Achievement** - Student achievements
+- **StudentStats** - Statistics aggregation
+
+### Relationships
+- User → Student/Teacher/Parent (One-to-One)
+- Student → Courses (Many-to-Many via Progress)
+- Parent → Students (Many-to-Many via Relationship)
+- Course → Assignments (One-to-Many)
+
+## 🚀 API Endpoints
+
+### Authentication
+```
+POST /api/v1/accounts/register/     # Register new user
+POST /api/v1/accounts/login/        # Login
+POST /api/v1/accounts/refresh/      # Refresh JWT token
+POST /api/v1/accounts/logout/       # Logout
+```
+
+### Students
+```
+GET  /api/v1/students/profile/      # Get student profile
+PUT  /api/v1/students/profile/update/ # Update profile
+```
+
+### Teachers
+```
+GET  /api/v1/teachers/profile/      # Get teacher profile
+GET  /api/v1/teachers/dashboard/    # Teacher dashboard data
+PUT  /api/v1/teachers/profile/update/ # Update profile
+```
+
+### Parents
+```
+GET  /api/v1/parents/profile/       # Get parent profile
+GET  /api/v1/parents/dashboard/     # Parent dashboard data
+```
+
+### Courses
+```
+GET  /api/v1/courses/               # List courses
+GET  /api/v1/courses/{id}/          # Course details
+GET  /api/v1/courses/my_courses/    # User's enrolled courses
+```
+
+### Dashboard
+```
+GET  /api/v1/dashboard/             # Student dashboard data
+```
+
+### Progress
+```
+GET  /api/v1/progress/              # Student progress
+POST /api/v1/progress/              # Update progress
+```
+
+### Assignments
+```
+GET  /api/v1/assignments/           # List assignments
+POST /api/v1/assignments/{id}/submit/ # Submit assignment
+```
+
+### Achievements
+```
+GET  /api/v1/achievements/          # List achievements
+```
+
+## 🔐 Security Features
+
+### Authentication & Authorization
+- JWT tokens with HttpOnly cookies
+- Token refresh mechanism
+- Role-based permissions
+- Rate limiting (5 login attempts/min)
+
+### Data Protection
+- Password validators (8+ chars, complexity)
+- HTTPS enforcement (production)
+- HSTS headers
+- Secure cookie configuration
+- Input validation
+
+### Attack Prevention
+- Rate limiting (100/hour anon, 1000/hour auth)
+- CORS properly configured
+- CSRF protection
+- XSS prevention headers
+- SQL injection protection (Django ORM)
+
+## 📊 Performance Optimizations
+
+### Database
+- 12 strategic indexes on frequently queried fields
+- `select_related()` for foreign keys
+- `prefetch_related()` for reverse relations
+- Query optimization in viewsets
+
+### API
+- Pagination (default: 10 items/page)
+- Response caching (planned)
+- Efficient serializers
+- Optimized querysets
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+python manage.py test
+
+# Run specific app tests
+python manage.py test courses
+
+# Run with coverage
+coverage run manage.py test
+coverage report
+```
+
+## 📝 Management Commands
+
+```bash
+# Seed database with sample data
+python manage.py seed_all_data
+
+# Create admin user
+python manage.py createsuperuser
+
+# Clear database (careful!)
+python reset_db.py
+```
+
+## 🚀 Deployment
+
+### Production Checklist
+
+```bash
+# 1. Update .env
+DEBUG=False
+SECRET_KEY=<generate-strong-key>
+
+# 2. Collect static files
+python manage.py collectstatic
+
+# 3. Run migrations
+python manage.py migrate
+
+# 4. Create superuser
+python manage.py createsuperuser
+
+# 5. Check deployment
+python manage.py check --deploy
+```
+
+### Deploy to Render/Railway/Heroku
+
+```bash
+# Install gunicorn
+pip install gunicorn
+
+# Add to requirements.txt
+
+# Create Procfile
+web: gunicorn kogidi.wsgi
+
+# Deploy
+git push heroku main
+```
+
+## 📚 API Documentation
+
+Access Swagger UI at:
+- Development: `http://localhost:8000/api/docs/`
+- Redoc: `http://localhost:8000/api/redoc/`
+
+## 🔧 Development
+
+### Code Style
+- Follow PEP 8
+- Use Django best practices
+- Type hints encouraged
+- Docstrings for all functions
+
+### Git Workflow
+1. Create feature branch
+2. Make changes
+3. Add tests
+4. Submit PR
+
+## 🐛 Common Issues
+
+### Database Connection Error
+```bash
+# Check MySQL is running
+service mysql status
+
+# Check credentials in .env
+# Verify database exists
+```
+
+### Migration Issues
+```bash
+# Reset migrations (development only)
+python manage.py migrate --fake-initial
+
+# Or delete and recreate DB
+```
+
+## 📄 License
+
+Proprietary - KoGidi Platform
 
 ---
 
-### Refresh Token
-
-`POST /api/auth/refresh/`
-
-Rotate access token using the refresh token cookie.
-
-**Request**
-
-* No body required. Browser sends `refresh_token` cookie automatically.
-
-**Response** (200 OK)
-
-* Sets new `access_token` cookie (HttpOnly, Secure, SameSite=Lax, max-age=900s)
-
-```json
-{ "msg": "Token refreshed" }
-```
-
-**Errors**
-
-* `401 Unauthorized` – no refresh token
-* `403 Forbidden` – invalid or expired refresh token
-
----
-
-### Logout
-
-`POST /api/auth/logout/`
-
-Clear both auth cookies.
-
-**Request**
-
-* No body.
-
-**Response** (200 OK)
-
-* Deletes `access_token` and `refresh_token` cookies.
-
-```json
-{ "msg": "Logged out" }
-```
-
----
-
-## Student Endpoints
-
-All student routes require a valid access token cookie. Permissions: only users with an active `StudentProfile`.
-
-Base path: `/api/students/`
-
-### List Students
-
-`GET /api/students/`
-
-**Response** (200 OK)
-
-```json
-[
-  {
-    "id": 1,
-    "user": {
-      "id": 10,
-      "username": "jdoe",
-      "email": "jdoe@example.com"
-    },
-    "date_of_birth": "2008-05-14",
-    "enrollment_date": "2024-09-01",
-    "grade_level": "Form 2",
-    "is_active": true
-  },
-  ...
-]
-```
-
----
-
-### Retrieve Student
-
-`GET /api/students/{id}/`
-
-**Response** (200 OK)
-
-```json
-{
-  "id": 1,
-  "user": { "id": 10, "username": "jdoe", "email": "jdoe@example.com" },
-  "date_of_birth": "2008-05-14",
-  "enrollment_date": "2024-09-01",
-  "grade_level": "Form 2",
-  "is_active": true
-}
-```
-
-**Errors**
-
-* `404 Not Found` – student does not exist
-* `403 Forbidden` – no permission
-
----
-
-### Create Student
-
-`POST /api/students/`
-
-**Request Body** (JSON)
-
-```json
-{
-  "user_id": 15,
-  "date_of_birth": "2009-02-21",
-  "grade_level": "Grade 9"
-}
-```
-
-**Response** (201 Created)
-
-```json
-{
-  "id": 5,
-  "user": { "id": 15, "username": "asmith", "email": "asmith@example.com" },
-  "date_of_birth": "2009-02-21",
-  "enrollment_date": "2025-05-24",
-  "grade_level": "Grade 9",
-  "is_active": true
-}
-```
-
-**Errors**
-
-* `400 Bad Request` – missing/invalid data
-* `409 Conflict` – profile already exists
-
----
-
-### Update Student
-
-`PUT /api/students/{id}/`
-
-**Request Body** (JSON)
-
-```json
-{
-  "grade_level": "Grade 10",
-  "is_active": false
-}
-```
-
-**Response** (200 OK)
-
-```json
-{
-  "id": 1,
-  "grade_level": "Grade 10",
-  "is_active": false,
-  ...
-}
-```
-
----
-
-### Delete Student
-
-`DELETE /api/students/{id}/`
-
-**Response**
-
-* `204 No Content` on success.
-
----
-
-## Teacher Endpoints
-
-Mirror the student endpoints under `/api/teachers/`.
-Use `TeacherProfile` model with fields like `department`, `hire_date`, `is_active`.
-
-* `GET /api/teachers/`
-* `GET /api/teachers/{id}/`
-* `POST /api/teachers/`
-* `PUT /api/teachers/{id}/`
-* `DELETE /api/teachers/{id}/`
-
-Permissions: only `TeacherProfile.is_active` users or admins.
-
----
-
-## Parent Endpoints
-
-Mirror similarly at `/api/parents/`.
-Fields: `user`, `child_relations` (list of student IDs), `is_active`.
-
-* `GET /api/parents/`
-* `GET /api/parents/{id}/`
-* `POST /api/parents/`
-* `PUT /api/parents/{id}/`
-* `DELETE /api/parents/{id}/`
-
----
-
-## Security & Middleware
-
-### Cookie Settings
-
-* **HttpOnly:** prevents JS access → mitigates XSS
-* **Secure:** send only over HTTPS
-* **SameSite=Lax:** mitigates CSRF for most cross-site requests
-* **max-age:**
-
-  * `access_token`: 900 seconds (15 min)
-  * `refresh_token`: 604800 seconds (7 days)
-
-### JWT Settings (Django `settings.py`)
-
-```python
-from datetime import timedelta
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'AUTH_HEADER_TYPES': (),  # we use cookies, not Authorization header
-}
-```
-
-### Custom Middleware (`kogidi/middleware/jwt_middleware.py`)
-
-```python
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.exceptions import AuthenticationFailed
-
-class JWTAuthMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-        self.auth = JWTAuthentication()
-
-    def __call__(self, request):
-        token = request.COOKIES.get('access_token')
-        if token:
-            try:
-                validated = self.auth.get_validated_token(token)
-                request.user, _ = self.auth.get_user(validated), validated
-            except AuthenticationFailed:
-                request.user = None
-        return self.get_response(request)
-```
-
----
-
-## Error Handling
-
-All responses use standard HTTP status codes:
-
-| Code | Meaning                                |
-| ---- | -------------------------------------- |
-| 200  | OK / Data returned                     |
-| 201  | Created                                |
-| 204  | No Content (successful delete)         |
-| 400  | Bad Request (validation errors)        |
-| 401  | Unauthorized (no/failing token)        |
-| 403  | Forbidden (expired refresh, no access) |
-| 404  | Not Found                              |
-| 409  | Conflict (duplicate resource)          |
-| 500  | Internal Server Error                  |
-
-Error responses include JSON:
-
-```json
-{ "error": "Descriptive message" }
-```
-
----
-
-## Models & Data Schemas
-
-### StudentProfile
-
-```python
-class StudentProfile(models.Model):
-    user = OneToOneField(User, ...)
-    date_of_birth = DateField(...)
-    enrollment_date = DateField(...)
-    grade_level = CharField(...)
-    is_active = BooleanField(default=True)
-```
-
-### TeacherProfile & ParentProfile
-
-Similar one-to-one extensions on `User` with their own fields:
-
-* **TeacherProfile**: `department`, `hire_date`, `subjects`, `is_active`
-* **ParentProfile**: `child_relations` (ManyToMany to Student), `is_active`
-
-Use DRF serializers:
-
-```python
-class StudentProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = StudentProfile
-        fields = "__all__"
-```
-
----
-
-## Changelog & Notes
-
-* **2025-05-24**: Initial JWT cookie-based auth + student/teacher/parent scaffolding.
-* **Next**: implement token blacklisting, admin roles, detailed audit logging, and rate-limiting.
-
----
-
-<!-- *End of KoGidi API Documentation* -->
+**Built with 🐍 by the KoGidi Team**

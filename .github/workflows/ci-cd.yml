@@ -1,0 +1,167 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Backend Tests
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: test_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        cd KoGidi-BE
+        pip install -r requirements.txt
+        
+    - name: Run migrations
+      run: |
+        cd KoGidi-BE
+        python manage.py migrate
+      env:
+        DB_NAME: test_db
+        DB_USER: root
+        DB_PASSWORD: test_password
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        SECRET_KEY: test-secret-key
+        DEBUG: True
+        
+    - name: Run tests
+      run: |
+        cd KoGidi-BE
+        python manage.py test
+      env:
+        DB_NAME: test_db
+        DB_USER: root
+        DB_PASSWORD: test_password
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        SECRET_KEY: test-secret-key
+        DEBUG: True
+        
+    - name: Check deployment readiness
+      run: |
+        cd KoGidi-BE
+        python manage.py check --deploy --fail-level WARNING
+      env:
+        SECRET_KEY: test-secret-key
+        DEBUG: False
+
+  # Frontend Tests & Build
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: KoGidi-FE/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd KoGidi-FE
+        npm ci
+        
+    - name: Lint code
+      run: |
+        cd KoGidi-FE
+        npm run lint || true
+        
+    - name: Type check
+      run: |
+        cd KoGidi-FE
+        npx tsc --noEmit
+        
+    - name: Build
+      run: |
+        cd KoGidi-FE
+        npm run build
+      env:
+        VITE_API_URL: https://api.example.com
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-build
+        path: KoGidi-FE/dist
+        retention-days: 7
+
+  # Security Scan
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Deploy to Staging (on main branch)
+  deploy-staging:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to staging
+      run: echo "Deploy to staging server"
+      # Add your deployment commands here
+      # Example: ssh user@staging-server 'cd app && git pull && docker-compose up -d'
+      
+  # Deploy to Production (manual trigger or tag)
+  deploy-production:
+    needs: [test-backend, test-frontend, security-scan]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to production
+      run: echo "Deploy to production server"
+      # Add your production deployment commands here

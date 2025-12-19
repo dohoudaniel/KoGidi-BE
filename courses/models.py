@@ -50,6 +50,13 @@ class Course(models.Model):
         verbose_name = _('course')
         verbose_name_plural = _('courses')
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['subject']),
+            models.Index(fields=['grade']),
+            models.Index(fields=['level']),
+            models.Index(fields=['is_published']),
+            models.Index(fields=['subject', 'grade']),
+        ]
     
     def __str__(self):
         return self.title
@@ -88,6 +95,11 @@ class StudentProgress(models.Model):
         verbose_name_plural = _('student progress')
         unique_together = ['student', 'course']
         ordering = ['-last_accessed']
+        indexes = [
+            models.Index(fields=['student', 'course']),
+            models.Index(fields=['is_completed']),
+            models.Index(fields=['last_accessed']),
+        ]
     
     def __str__(self):
         return f"{self.student.email} - {self.course.title} ({self.progress_percentage}%)"
@@ -138,6 +150,12 @@ class Assignment(models.Model):
         verbose_name = _('assignment')
         verbose_name_plural = _('assignments')
         ordering = ['due_date', '-created_at']
+        indexes = [
+            models.Index(fields=['student', 'status']),
+            models.Index(fields=['course']),
+            models.Index(fields=['due_date']),
+            models.Index(fields=['status']),
+        ]
     
     def __str__(self):
         return f"{self.title} - {self.course.title}"
