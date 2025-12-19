@@ -33,6 +33,7 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [
+    "localhost",
     "127.0.0.1",
     "kogidi.vercel.app",
     "kogidi.netlify.app",
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     'students',
     'teachers',
     'parents',
+    'courses',  # Added for courses, progress, assignments, achievements
 ]
 
 # Custom user model
@@ -180,11 +182,15 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only, set to False in production
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all origins in development only
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "https://kogidi.vercel.app",
+    "https://kogidi.netlify.app",
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -204,6 +210,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'cookie',
 ]
 
 # Media files
@@ -213,6 +220,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Static files configuration
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# STATICFILES_DIRS will be added when static directory is created

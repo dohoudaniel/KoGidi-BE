@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/v1/students/', include('students.urls')),
     path('api/v1/teachers/', include('teachers.urls')),
     path('api/v1/parents/', include('parents.urls')),
+    path('api/v1/', include('courses.urls')),  # Courses, progress, assignments, achievements
 
     # Swagger documentation
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',

@@ -75,13 +75,17 @@ class RegisterView(generics.CreateAPIView):
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        # Create response with tokens in cookies
+        # Create response with tokens in both cookies AND response body for compatibility
         response = Response({
             "message": "User registered successfully",
-            "user": UserSerializer(user).data
+            "user": UserSerializer(user).data,
+            "access": access_token,  # Include in body for localStorage option
+            "refresh": refresh_token,  # Include in body for localStorage option
+            "token": access_token,  # Alias for backward compatibility
+            "access_token": access_token,  # Another alias
         }, status=status.HTTP_201_CREATED)
 
-        # Set cookies
+        # Set cookies (HttpOnly for security)
         response.set_cookie(
             'access_token',
             access_token,
@@ -184,13 +188,17 @@ class LoginView(APIView):
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        # Create response with tokens in cookies
+        # Create response with tokens in both cookies AND response body for compatibility
         response = Response({
             "message": "Login successful",
-            "user": UserSerializer(user).data
+            "user": UserSerializer(user).data,
+            "access": access_token,  # Include in body for localStorage option
+            "refresh": refresh_token,  # Include in body for localStorage option
+            "token": access_token,  # Alias for backward compatibility
+            "access_token": access_token,  # Another alias
         })
 
-        # Set cookies
+        # Set cookies (HttpOnly for security)
         response.set_cookie(
             'access_token',
             access_token,

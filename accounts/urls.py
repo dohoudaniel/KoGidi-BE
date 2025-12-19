@@ -11,4 +11,5 @@ urlpatterns = [
     path('v1/auth/logout/', LogoutView.as_view(), name='logout'),
     path('v1/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('v1/auth/profile/', UserProfileView.as_view(), name='user_profile'),
+    path('v1/auth/me/', UserProfileView.as_view(), name='user_me'),  # Alias for frontend compatibility
 ]
