@@ -13,8 +13,8 @@ class TeacherSerializer(serializers.ModelSerializer):
         model = Teacher
         fields = [
             'id', 'user', 'subject_specialization', 'years_of_experience',
-            'qualification', 'bio', 'employee_id', 'department', 'hire_date',
-            'teaching_level', 'certifications', 'contact_number', 'created_at', 'updated_at'
+            'qualification', 'bio', 'employee_id', 'department',
+            'office_location', 'contact_hours', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
 
@@ -33,8 +33,8 @@ class TeacherProfileUpdateSerializer(serializers.ModelSerializer):
         model = Teacher
         fields = [
             'subject_specialization', 'years_of_experience', 'qualification',
-            'bio', 'employee_id', 'department', 'hire_date', 'teaching_level',
-            'certifications', 'contact_number', 'first_name', 'last_name', 'resident_state'
+            'bio', 'employee_id', 'department', 'office_location', 'contact_hours',
+            'first_name', 'last_name', 'resident_state'
         ]
 
     def update(self, instance, validated_data):

@@ -77,6 +77,8 @@ class StudentProgressViewSet(viewsets.ModelViewSet):
         """
         Return progress only for the current user
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return StudentProgress.objects.none()
         return StudentProgress.objects.filter(student=self.request.user).select_related('course')
     
     def perform_create(self, serializer):
@@ -97,6 +99,8 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         """
         Return assignments for the current user
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return Assignment.objects.none()
         queryset = Assignment.objects.filter(
             Q(student=self.request.user) | Q(student__isnull=True)
         ).select_related('course')
@@ -134,6 +138,8 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Return achievements only for the current user
         """
+        if getattr(self, 'swagger_fake_view', False):
+            return Achievement.objects.none()
         return Achievement.objects.filter(student=self.request.user)
 
 
